@@ -1,0 +1,22 @@
+[
+  {
+    "path": "node_modules/zustand/middleware.js",
+    "sha256": "255f34d0f8872c4f928459482f384a24c07502351fdea7e961dfd0e3bd3248ef",
+    "replacement": "window.localStorage accessor replaced by an explicit throwing function; no replacement storage"
+  },
+  {
+    "path": "node_modules/zustand/esm/middleware.mjs",
+    "sha256": "06acf5818857096359bdd9703fe06cf7a194c6df65af846fc13aab071c7bcfc4",
+    "replacement": "window.localStorage accessor replaced by an explicit throwing function; no replacement storage"
+  },
+  {
+    "path": "node_modules/jotai/vanilla/utils.js",
+    "sha256": "ed8c3788ae9a490a181940011b6b4bde0df8bd3a8495a3f36ae2ce4807c36bb1",
+    "replacement": "window.localStorage accessor replaced by an explicit throwing function; no replacement storage"
+  },
+  {
+    "path": "node_modules/jotai/esm/vanilla/utils.mjs",
+    "sha256": "d90b6adf0c914f72ccdbf67439a8b19da697401911216615ce462176205c6856",
+    "replacement": "window.localStorage accessor replaced by an explicit throwing function; no replacement storage"
+  }
+]

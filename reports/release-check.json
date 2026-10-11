@@ -1,0 +1,10 @@
+{
+  "result": "passed",
+  "files": 6,
+  "bytes": 1117272,
+  "mebibytes": 1.066,
+  "limits": "20 MiB / 2000 files",
+  "localAssetsOnly": true,
+  "sourceAndReleaseSchemasIdentical": true,
+  "browserAcceptance": "Not claimed by static checks; see Porting hosted acceptance evidence."
+}

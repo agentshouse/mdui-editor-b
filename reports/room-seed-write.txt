@@ -1,0 +1,6 @@
+results:
+  - path: /rooms/document-editor-port/settings/schema.yaml
+    revision: fr_5rs.4.d
+  - path: /rooms/document-editor-port/plate/basic-blocks.md
+    revision: fr_6kz.1.c
+

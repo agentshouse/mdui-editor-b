@@ -1,0 +1,11 @@
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+import {verify} from '@agentshouse/mdmodel';
+import {createHash} from 'node:crypto';
+const schema=fs.readFileSync('schema.yaml','utf8');assert.equal(verify(schema).verdict,'accept');
+const provenance=JSON.parse(fs.readFileSync('reports/plate-source-map.json','utf8'));
+for(const sample of provenance.samples)assert.equal(createHash('sha256').update(fs.readFileSync(sample.file)).digest('hex'),sample.sha256);
+const content=fs.readFileSync('samples/plate-basic-blocks.json','utf8');
+const fields={title:'Basic blocks',content,archived:false,source_url:'https://github.com/udecode/plate/blob/45aee8fd81a596fad5efc4e61ab377bb225fb11c/apps/www/src/registry/examples/values/basic-blocks-value.tsx',source_revision:'45aee8fd81a596fad5efc4e61ab377bb225fb11c',author:'Plate contributors',license:'MIT'};
+const seed='---\ntype: plate_article\n'+Object.entries(fields).map(([key,value])=>`${key}: ${JSON.stringify(value)}`).join('\n')+'\n---\n';fs.writeFileSync('samples/plate-basic-blocks.md',seed);
+console.log('Schema and exact licensed sample hashes passed.');

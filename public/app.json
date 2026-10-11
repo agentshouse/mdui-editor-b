@@ -1,0 +1,12 @@
+{
+  "entry": "index.html",
+  "room_slots": [
+    {
+      "name": "articles",
+      "access": "write",
+      "types": [
+        "plate_article"
+      ]
+    }
+  ]
+}
