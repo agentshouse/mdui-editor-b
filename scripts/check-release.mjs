@@ -70,6 +70,10 @@ for (const file of files) {
         ))
           asset(match[1], file);
     }
+    if (file.endsWith(".css")) {
+      assert(!/prefers-color-scheme\s*:\s*dark/.test(content), 'OS-dark media must not recolor the fixed-light editor');
+      assert(content.includes(':is(.dark *)'), 'Dark utilities must use the donor class-based boundary');
+    }
     if (file.endsWith(".css"))
       for (const match of content.matchAll(
         /url\(\s*["']?([^"'\s)]+)["']?\s*\)/g,

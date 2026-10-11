@@ -1,8 +1,8 @@
 {
   "result": "passed",
   "files": 6,
-  "bytes": 1118453,
-  "mebibytes": 1.067,
+  "bytes": 1118295,
+  "mebibytes": 1.066,
   "limits": "20 MiB / 2000 files",
   "localAssetsOnly": true,
   "sourceAndReleaseSchemasIdentical": true,
