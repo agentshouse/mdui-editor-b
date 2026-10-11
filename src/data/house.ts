@@ -20,7 +20,7 @@ export class ArticleStore {
   private state:Snapshot={articles:[],ready:false,error:'',outcomes:{},saving:false};
   private listeners=new Set<()=>void>();
   private md?:Runtime; private room=''; private synced=false; private guards=false; private denied=''; private lost=''; private init?:Promise<void>;
-  private documents:Article[]=[]; private drafts:readonly RoomDraft[]=[]; private sessions=new Map<string,DraftSession>(); private overrides=new Map<string,Article>(); private jobs=new Map<string,Promise<void>>(); private failedPatches=new Map<string,Partial<Fields>>(); private uncertain=new Set<string>();
+  private documents:Article[]=[]; private drafts:readonly RoomDraft[]=[]; private sessions=new Map<string,DraftSession>(); private overrides=new Map<string,Article>(); private jobs=new Map<string,Promise<void>>(); private failedPatches=new Map<string,Partial<Fields>>(); private uncertain=new Set<string>(); private batchOutcomes=new Map<string,string>(); private queueBatches=new Map<string,Map<string,string[]>>();
   private closes:(()=>void)[]=[]; private disposed=false; private generation=0; private queryRoom='';
   constructor(private provider:()=>Promise<Runtime>=async()=>{const bridge=connectHouseBridge();bridge.setTab({title:'editor-b'});return bridge.runtime;}){}
   snapshot=()=>this.state; subscribe=(fn:()=>void)=>{this.listeners.add(fn);return()=>{this.listeners.delete(fn);};};
@@ -49,7 +49,12 @@ export class ArticleStore {
   private async openQuery(room:string){this.queryRoom=room;const gen=++this.generation;try{
     const watch=await this.md!.observe('query',{...query,rooms:[room]});if(gen!==this.generation||this.disposed){watch.close();return;}
     this.watch(watch,result=>{if(gen!==this.generation||room!==this.room)return;this.documents=result.documents.map(d=>({room:d.room,path:d.path,fields:d.fields as Fields}));this.render();});
-    this.watch(await this.md!.observe('queue',room),entries=>{const outcomes={...this.state.outcomes};for(const e of entries)for(const c of e.batch.changes){if(!c.path.startsWith('plate/'))continue;outcomes[`${room}/${c.path}`]=e.state==='accepted'?'Accepted by House.':e.state==='submitted'?'Submitted; waiting for House.':e.state==='reset'?'Queued; House scheduled a retry.':'Queued locally; waiting for House.';}this.emit({outcomes});});
+    this.watch(await this.md!.observe('queue',room),entries=>{
+      const outcomes={...this.state.outcomes};const previous=this.queueBatches.get(room)??new Map<string,string[]>();const current=new Map<string,string[]>();
+      for(const e of entries){const paths=e.batch.changes.filter(c=>c.path.startsWith('plate/')).map(c=>`${room}/${c.path}`);current.set(e.batch.id,paths);const status=e.state==='accepted'?'Accepted by House.':e.state==='submitted'?'Submitted; waiting for House.':e.state==='reset'?'Queued; House scheduled a retry.':'Queued locally; waiting for House.';this.batchOutcomes.set(e.batch.id,status);for(const path of paths)outcomes[path]=status;}
+      for(const [batch,paths]of previous)if(!current.has(batch)&&this.batchOutcomes.get(batch)!=='Accepted by House.'){const status='Queue entry is no longer visible; review this document in House before retrying.';this.batchOutcomes.set(batch,status);for(const path of paths)outcomes[path]=status;}
+      this.queueBatches.set(room,current);this.emit({outcomes});
+    });
   }catch(e){if(gen===this.generation){this.queryRoom='';this.emit({error:message(e)});}}}
   edit(article:Article,patch:Partial<Fields>):Promise<void>{
     const k=key(article);const previous=this.overrides.get(k)??this.state.articles.find(a=>key(a)===k)??article;
@@ -65,7 +70,7 @@ export class ArticleStore {
       this.failedPatches.delete(k);
       this.drafts=[...this.drafts.filter(d=>key(d)!==k),...(session.current()?[session.current()!]:[])];
       if(this.overrides.get(k)===edited)this.overrides.delete(k);
-      this.emit({outcomes:{...this.state.outcomes,[k]:'Local Room draft; not saved.'}});
+      this.emit({error:this.denied||this.lost,outcomes:{...this.state.outcomes,[k]:'Local Room draft; not saved.'}});
     }).catch(e=>{this.failedPatches.set(k,{...this.failedPatches.get(k),...patch});if(this.overrides.get(k)===edited)this.overrides.set(k,{...edited,pending:false,failed:true});this.emit({error:message(e)});throw e;}).finally(()=>this.render());
     this.jobs.set(k,job);return job;
   }
@@ -73,7 +78,7 @@ export class ArticleStore {
   save(article:Article):Promise<void>{
     const k=key(article);if(this.uncertain.has(k))return Promise.reject(new Error('The previous Save result is uncertain. Review this document in House before retrying.'));if(this.state.saving)return Promise.reject(new Error('A Save is already in progress.'));
     this.emit({saving:true});const prior=this.jobs.get(k);
-    const job=(async()=>{await prior;if(!this.state.ready||this.room!==article.room)throw new Error('This Room is unavailable. The draft is preserved.');if(this.overrides.get(k)?.failed)throw new Error('Local input was not stored. Edit again before saving.');const s=this.session(article);const draft=await s.read();if(!draft)return;const current=this.state.articles.find(a=>key(a)===k)??article;validateFields(current.fields);const batch=await s.commit(draft.revision);this.drafts=this.drafts.filter(d=>key(d)!==k);if(s.current())this.drafts=[...this.drafts,s.current()!];if(batch)this.emit({outcomes:{...this.state.outcomes,[k]:'Queued locally; waiting for House.'}});})().catch(e=>{if(e instanceof DraftSaveUncertainError)this.uncertain.add(k);this.emit({error:message(e),outcomes:{...this.state.outcomes,[k]:message(e)}});throw e;}).finally(()=>{this.emit({saving:false});this.render();});
+    const job=(async()=>{await prior;if(!this.state.ready||this.room!==article.room)throw new Error('This Room is unavailable. The draft is preserved.');if(this.overrides.get(k)?.failed)throw new Error('Local input was not stored. Edit again before saving.');const s=this.session(article);const draft=await s.read();if(!draft)return;const current=this.state.articles.find(a=>key(a)===k)??article;validateFields(current.fields);const batch=await s.commit(draft.revision);this.drafts=this.drafts.filter(d=>key(d)!==k);if(s.current())this.drafts=[...this.drafts,s.current()!];if(batch)this.emit({error:this.denied||this.lost,outcomes:{...this.state.outcomes,[k]:this.batchOutcomes.get(batch)??'Queued locally; waiting for House.'}});})().catch(e=>{if(e instanceof DraftSaveUncertainError)this.uncertain.add(k);this.emit({error:message(e),outcomes:{...this.state.outcomes,[k]:message(e)}});throw e;}).finally(()=>{this.emit({saving:false});this.render();});
     this.jobs.set(k,job);return job;
   }
   dispose(){this.disposed=true;this.closes.splice(0).forEach(fn=>fn());this.listeners.clear();}
