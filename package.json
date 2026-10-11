@@ -12,7 +12,10 @@
     "build": "node scripts/prepare-release.mjs && vite build",
     "release:check": "node scripts/check-release.mjs",
     "notices": "node scripts/generate-notices.mjs",
-    "publish": "node publish.mjs"
+    "starter:check": "node scripts/check-starter.mjs",
+    "publish": "node publish.mjs",
+    "verify": "npm run typecheck && npm run lint && npm test -- --maxWorkers=1 && npm run starter:check && npm run model:check && npm run build && npm run release:check",
+    "model:check": "node scripts/validate-model.mjs"
   },
   "dependencies": {
     "@agentshouse/app-bridge": "0.1.0-ce524f6608238",

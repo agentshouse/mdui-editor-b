@@ -1,0 +1,8 @@
+HTML starter article attribution
+
+Source: https://dokie.li/docs
+Repository: https://github.com/dokieli/dokieli
+Revision: 7deba503d5a5f5ea239aafaa630b705311453e81
+Author: Sarven Capadisli and dokieli contributors.
+License: Creative Commons Attribution 4.0 International, https://creativecommons.org/licenses/by/4.0/
+Adaptations retained from the existing licensed sample: executable elements, remote embeds and remote image loads removed; navigational links normalized. Article text, source links and attribution retained. No conversion to block-tree content is performed.

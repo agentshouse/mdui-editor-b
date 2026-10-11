@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import type { Plugin } from 'vite';
-const pinned=JSON.parse(readFileSync(new URL('../reports/disabled-storage-accessors.json',import.meta.url),'utf8')) as {path:string;sha256:string}[];
+const pinned=JSON.parse(readFileSync(new URL('../tests/support/disabled-storage-accessors.json',import.meta.url),'utf8')) as {path:string;sha256:string}[];
 /** Plate store helpers expose opt-in browser persistence even though no retained
  * kit enables it. Remove those accessors from production, failing closed if any
  * future kit tries them; never substitute a recovery store. */

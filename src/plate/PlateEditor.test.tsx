@@ -8,7 +8,7 @@ import { toggleCodeBlock } from '@platejs/code-block';
 import { upsertLink } from '@platejs/link';
 import { Editor } from './ui/editor';
 import { TooltipProvider } from './components/tooltip';
-import sample from '../../samples/plate-basic-blocks.json';
+import sample from '../../tests/support/samples/plate-basic-blocks.json';
 const value: Value = [{ type: 'p', custom: { retained: true }, children: [{ text: 'Hello Plate', bold: true }] }];
 describe('Retained public Plate registry', () => {
   it('renders public editor, mark/list controls and supplied tree', () => {

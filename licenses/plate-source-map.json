@@ -223,7 +223,7 @@
   "samples": [
     {
       "source": "apps/www/src/registry/examples/values/basic-blocks-value.tsx",
-      "file": "samples/plate-basic-blocks.json",
+      "file": "tests/support/samples/plate-basic-blocks.json",
       "sourceSha256": "fb17ec6c408fb3ed785ee5dc71bbf39dd556524cef656b0501b74929e9961131",
       "sha256": "fa6b4f9e486ae3cd6f754e8b15bc22ee9f7100dd7235bc7e4150f6fcf5a564e0",
       "conversion": "Lossless semantic conversion of donor JSX sample to Plate JSON; JSX whitespace collapsed as React does. No replacement prose."
