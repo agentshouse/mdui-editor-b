@@ -1,7 +1,7 @@
 import { validatePlateValue } from '../plate/validate';
-import { connectHouseBridge } from '@agentshouse/app-bridge';
+import { houseBridge as getHouseBridge } from '@agentshouse/app-bridge';
 import { DraftSession, DraftSaveUncertainError, type RoomDraft } from './draft-session';
-export type Runtime = Awaited<ReturnType<typeof connectHouseBridge>['runtime']>;
+export type Runtime = Awaited<ReturnType<typeof getHouseBridge>['runtime']>;
 export type Fields = { title: string; content: string; archived: boolean; source_url: string; source_revision: string; author: string; license: string };
 export type Article = { room: string; path: string; fields: Fields; draft?: RoomDraft; pending?: boolean; failed?: boolean };
 export type Snapshot = { articles: Article[]; loaded: boolean; ready: boolean; error: string; outcomes: Record<string,string>; saving: boolean };
@@ -15,8 +15,8 @@ export function validateFields(fields: Fields) {
  if(!fields.title.trim())throw new Error('A title is required. Your partial draft is preserved.');
  parseContent(fields.content); return fields;
 }
-let bridge: ReturnType<typeof connectHouseBridge> | undefined;
-export function houseBridge(){if(!bridge){bridge=connectHouseBridge();bridge.setTab({title:'editor-b'});}return bridge;}
+let bridge: ReturnType<typeof getHouseBridge> | undefined;
+export function houseBridge(){if(!bridge){bridge=getHouseBridge();bridge.setTab({title:'editor-b'});}return bridge;}
 const message=(e:unknown)=>e instanceof Error?e.message:String(e);
 export class ArticleStore {
   private state:Snapshot={articles:[],loaded:false,ready:false,error:'',outcomes:{},saving:false};

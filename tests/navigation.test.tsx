@@ -1,7 +1,7 @@
 import React from 'react';
 import {afterEach,expect,it,vi} from 'vitest';
 import {render,screen,cleanup,fireEvent,waitFor,act} from '@testing-library/react';
-import {connectHouseBridge} from '@agentshouse/app-bridge';
+import {houseBridge} from '@agentshouse/app-bridge';
 import {createHouseBridgeTestHost} from '@agentshouse/app-bridge/test-host';
 import {App} from '../src/App';
 import {ArticleStore,type Fields} from '../src/data/house';
@@ -14,7 +14,7 @@ const target=(path=second.path)=>({room:'r_one',path,view:'source' as const});
 afterEach(cleanup);
 function setup(address:string|null=articleAddress(target())){
  const fake=fakeRuntime([first,second]);const store=new ArticleStore(async()=>fake.runtime);
- const host=createHouseBridgeTestHost(address===null?{}:{address});const nav=new ArticleNavigation(connectHouseBridge(host));
+ const host=createHouseBridgeTestHost(address===null?{}:{address});const nav=new ArticleNavigation(houseBridge());
  return {...fake,store,host,nav};
 }
 it('accepts only bounded article identity and optional source view',()=>{
